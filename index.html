@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Praja Quick Response</title>
+
+  <!-- PWA & META CONFIG -->
+  <meta name="theme-color" content="#8c734b">
+  <meta name="description" content="Sistem Pelaporan Reaksi Cepat Satpol PP">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="polpp-192.png">
+
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
+    body { background-color: #f0f2f5; margin: 0; padding: 15px; color: #2d3748; }
+    
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    /* BANNER INSTALL PWA */
+    .pwa-banner {
+      display: none;
+      background: #1a365d;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.12);
+    }
+    .pwa-btn {
+      background: #8c734b;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* HEADER WARNA KHAKI SATPOL PP */
+    .header { 
+      background: linear-gradient(135deg, #b89b72 0%, #8c734b 100%); 
+      color: white; 
+      padding: 15px 20px; 
+      border-radius: 12px; 
+      margin-bottom: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.12); 
+      border-bottom: 4px solid #1a365d; /* Lis Biru Navy Satpol PP */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+    .header-logo {
+      width: 55px;
+      height: 55px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .header-title {
+      text-align: center;
+      flex-grow: 1;
+    }
+    .header h1 { 
+      margin: 0; 
+      font-size: 22px; 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    }
+    .header p { 
+      margin: 5px 0 0 0; 
+      opacity: 0.95; 
+      font-size: 13px; 
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    /* WIDGET REKAP STATISTIK LAPORAN */
+    .stat-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .stat-card {
+      background: white;
+      padding: 12px 10px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border-top: 4px solid #cbd5e0;
+    }
+    .stat-card.total { border-top-color: #4a5568; }
+    .stat-card.menunggu { border-top-color: #e53e3e; }
+    .stat-card.proses { border-top-color: #3182ce; }
+    .stat-card.selesai { border-top-color: #38a169; }
+
+    .stat-number {
+      font-size: 20px;
+      font-weight: bold;
+      color: #2d3748;
+      margin-top: 2px;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: #718096;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    /* Responsif untuk layar HP kecil */
+    @media (max-width: 480px) {
+      .header-logo { width: 42px; height: 42px; }
+      .header h1 { font-size: 17px; }
+      .header p { font-size: 11px; }
+      .stat-container { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .stat-number { font-size: 18px; }
+      .stat-label { font-size: 10px; }
+    }
+
+    .tab-container { display: flex; gap: 10px; margin-bottom: 15px; }
+    .tab-btn {
+      flex: 1; padding: 12px; border: none; background: #e2e8f0; color: #4a5568;
+      font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 14px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active { background: #8c734b; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+    .card-list { display: flex; flex-direction: column; gap: 15px; }
+    .card { 
+      background: white; border-radius: 10px; padding: 18px; 
+      border-left: 6px solid #e53e3e; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .card.proses, .card.diproses { border-left-color: #3182ce; }
+    .card.selesai { border-left-color: #38a169; }
+
+    .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edf2f7; padding-bottom: 8px; margin-bottom: 10px; }
+    .card-id { font-size: 12px; color: #718096; font-weight: bold; }
+
+    .info-row { margin: 6px 0; font-size: 14px; color: #2d3748; }
+    .info-label { font-weight: bold; width: 110px; display: inline-block; color: #4a5568; }
+
+    .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .badge-menunggu { background: #fed7d7; color: #9b2c2c; }
+    .badge-proses { background: #bee3f8; color: #2b6cb0; }
+    .badge-selesai { background: #c6f6d5; color: #22543d; }
+
+    .btn-group { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
+    .btn { border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-maps { background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; }
+    .btn-wa { background: #25d366; color: white; }
+    .btn-proses { background: #3182ce; color: white; }
+    .btn-selesai { background: #38a169; color: white; }
+    .btn-foto { background: #718096; color: white; }
+    .btn:hover { opacity: 0.9; }
+
+    .btn-refresh { background: #8c734b; color: white; padding: 10px 18px; border-radius: 8px; margin-bottom: 15px; width: 100%; border: none; font-weight: bold; cursor: pointer; }
+    .btn-refresh:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Modal Pop-up Upload Bukti */
+    .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+    .modal-content { background-color: white; padding: 20px; border-radius: 12px; max-width: 450px; width: 90%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; color: #8c734b; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- BANNER INSTALL PWA -->
+    <div id="pwaBanner" class="pwa-banner">
+      <span>📲 Pasang Aplikasi PQR di layar utama HP Anda</span>
+      <button class="pwa-btn" id="btnInstallPwa">Install</button>
+    </div>
+
+    <div class="header">
+      <!-- LOGO KIRI -->
+      <img src="kotaserang.png" alt="Logo Daerah" class="header-logo">
+      
+      <div class="header-title">
+        <h1>🛡️ PRAJA QUICK RESPONSE</h1>
+        <p>Dashboard Aduan Masyarakat</p>
+      </div>
+
+      <!-- LOGO KANAN -->
+      <img src="polpp.png" alt="Logo Satpol PP" class="header-logo">
+    </div>
+
+    <!-- WIDGET REKAP STATISTIK -->
+    <div class="stat-container">
+      <div class="stat-card total">
+        <div class="stat-label">Total Masuk</div>
+        <div class="stat-number" id="stat-total">0</div>
+      </div>
+      <div class="stat-card menunggu">
+        <div class="stat-label">Menunggu</div>
+        <div class="stat-number" id="stat-menunggu">0</div>
+      </div>
+      <div class="stat-card proses">
+        <div class="stat-label">Diproses</div>
+        <div class="stat-number" id="stat-proses">0</div>
+      </div>
+      <div class="stat-card selesai">
+        <div class="stat-label">Selesai</div>
+        <div class="stat-number" id="stat-selesai">0</div>
+      </div>
+    </div>
+
+    <div class="tab-container">
+      <button id="tab-aktif" class="tab-btn active" onclick="switchTab('aktif')">🚨 Laporan Aktif</button>
+      <button id="tab-riwayat" class="tab-btn" onclick="switchTab('riwayat')">📜 Riwayat Pelaporan</button>
+    </div>
+
+    <button id="btn-refresh" class="btn-refresh" onclick="muatLaporan()">🔄 Perbarui Laporan Masuk</button>
+
+    <div class="card-list" id="laporan-container">
+      <p style="text-align: center; color: #718096;">Memuat laporan dari database...</p>
+    </div>
+  </div>
+
+  <!-- MODAL POPUP UPLOAD FOTO SELESAI -->
+  <div id="modalUpload" class="modal">
+    <div class="modal-content">
+      <div class="modal-title">📸 Unggah Bukti Penanganan</div>
+      <p style="font-size: 13px; color: #4a5568;">Wajib mengambil/mengunggah foto penanganan lapangan untuk menyelesaikan laporan <strong id="modal-id-text"></strong>.</p>
+      
+      <input type="file" id="inputFotoBukti" accept="image/*" capture="environment" style="width: 100%; margin: 15px 0;">
+      
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn btn-maps" onclick="tutupModal()">Batal</button>
+        <button class="btn btn-selesai" id="btnProsesSelesai" onclick="submitSelesai()">Kirim & Selesaikan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUFv08ftcR2lchsV7mnsxEhehbESEl4fzRjPIRjhIVVxk_VLAAjrOHFNhs2ZsNCzOK7A/exec";
+    
+    let currentTab = 'aktif';
+    let rawData = [];
+    let selectedIdForSelesai = '';
+    let isModalOpen = false;
+
+    // --- INTEGRASI SERVICE WORKER & PWA INSTALL BANNER ---
+    let deferredPrompt;
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('SW Registered:', reg.scope))
+          .catch(err => console.log('SW Fail:', err));
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const banner = document.getElementById('pwaBanner');
+      if (banner) banner.style.display = 'flex';
+    });
+
+    document.getElementById('btnInstallPwa')?.addEventListener('click', () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('pwaBanner').style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      }
+    });
+
+    // --- FUNGSI DASHBOARD UTAMA ---
+    function switchTab(mode) {
+      currentTab = mode;
+      document.getElementById('tab-aktif').classList.toggle('active', mode === 'aktif');
+      document.getElementById('tab-riwayat').classList.toggle('active', mode === 'riwayat');
+      renderData();
+    }
+
+    function updateStatistikUI(rekap) {
+      if (!rekap) return;
+      document.getElementById('stat-total').innerText = rekap.total || 0;
+      document.getElementById('stat-menunggu').innerText = rekap.menunggu || 0;
+      document.getElementById('stat-proses').innerText = rekap.proses || 0;
+      document.getElementById('stat-selesai').innerText = rekap.selesai || 0;
+    }
+
+    function muatLaporan() {
+      if (isModalOpen) return;
+
+      const container = document.getElementById('laporan-container');
+      const btnRefresh = document.getElementById('btn-refresh');
+      btnRefresh.disabled = true;
+      btnRefresh.innerText = "⏳ Memuat data terbaru...";
+      
+      fetch(SCRIPT_URL)
+        .then(res => res.json())
+        .then(resData => {
+          btnRefresh.disabled = false;
+          btnRefresh.innerText = "🔄 Perbarui Laporan Masuk";
+          
+          // Menerima Format JSON Gabungan (Rekap + Data)
+          if (resData && resData.data) {
+            rawData = resData.data || [];
+            updateStatistikUI(resData.rekap);
+          } else if (Array.isArray(resData)) {
+            // Fallback jika menerima array murni
+            rawData = resData || [];
+          }
+
+          renderData();
+        })
+        .catch(err => {
+          btnRefresh.disabled = false;
+          btnRefresh.innerText = "🔄 Perbarui Laporan Masuk";
+          if (!rawData || rawData.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: red;">Gagal memuat data. Periksa koneksi internet.</p>';
+          }
+        });
+    }
+
+    function renderData() {
+      const container = document.getElementById('laporan-container');
+      container.innerHTML = '';
+
+      if (!rawData || rawData.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #718096;">Belum ada laporan masuk.</p>';
+        return;
+      }
+
+      let filteredData = rawData.filter(item => {
+        let st = (item.status || "MENUNGGU").toString().toUpperCase().trim();
+        if (currentTab === 'aktif') {
+          return st === 'MENUNGGU' || st === 'PROSES' || st === 'DIPROSES';
+        } else {
+          return true;
+        }
+      });
+
+      if (filteredData.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: #718096;">Tidak ada laporan ${currentTab === 'aktif' ? 'aktif' : 'di riwayat'}.</p>`;
+        return;
+      }
+
+      filteredData.slice().reverse().forEach(item => {
+        let st = (item.status || "MENUNGGU").toString().toUpperCase().trim();
+        
+        let statusClass = 'menunggu';
+        let badgeClass = 'badge-menunggu';
+        
+        if (st === 'PROSES' || st === 'DIPROSES') { 
+          statusClass = 'proses'; 
+          badgeClass = 'badge-proses'; 
+        } else if (st === 'SELESAI') { 
+          statusClass = 'selesai'; 
+          badgeClass = 'badge-selesai'; 
+        }
+
+        let isMapsLink = (item.lokasi || '').includes('http');
+        let mapsBtnHTML = isMapsLink 
+          ? `<a href="${item.lokasi}" target="_blank" class="btn btn-maps">📍 Maps</a>`
+          : `<span class="btn btn-maps" style="cursor:default">📍 ${item.lokasi || '-'}</span>`;
+
+        let cleanPhone = (item.contact || '').toString().replace(/[^0-9]/g, '');
+        if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+        let waBtnHTML = cleanPhone.length > 5 
+          ? `<a href="https://wa.me/${cleanPhone}?text=Halo%20${encodeURIComponent(item.nama || 'Pelapor')},%20kami%20dari%20Tim%20Reaksi%20Cepat%20Satpol%20PP%20menindaklanjuti%20laporan%20Anda." target="_blank" class="btn btn-wa">💬 WA</a>`
+          : '';
+
+        let fotoLaporanHTML = item.fotoLaporan ? `<a href="${item.fotoLaporan}" target="_blank" class="btn btn-foto">📷 Foto Laporan</a>` : '';
+        let fotoSelesaiHTML = item.fotoSelesai ? `<a href="${item.fotoSelesai}" target="_blank" class="btn btn-foto" style="background:#38a169">📷 Bukti Penanganan</a>` : '';
+
+        let tombolStatus = '';
+        if (st === 'MENUNGGU') {
+          tombolStatus = `<button class="btn btn-proses" onclick="updateStatusSimpel('${item.id}', 'PROSES')">🚀 Tindak Lanjuti</button>`;
+        } else if (st === 'PROSES' || st === 'DIPROSES') {
+          tombolStatus = `<button class="btn btn-selesai" onclick="bukaModalSelesai('${item.id}')">✅ Selesaikan</button>`;
+        }
+
+        const cardHTML = `
+          <div class="card ${statusClass}">
+            <div class="card-header">
+              <span class="card-id">${item.id}</span>
+              <span class="badge ${badgeClass}">${st}</span>
+            </div>
+            <div class="info-row"><span class="info-label">👤 Nama</span>: ${item.nama || '-'}</div>
+            <div class="info-row"><span class="info-label">📞 Kontak</span>: ${item.contact || '-'}</div>
+            <div class="info-row"><span class="info-label">🕒 Waktu</span>: ${item.waktu || '-'}</div>
+            <div class="info-row"><span class="info-label">📝 Deskripsi</span>: <strong>${item.laporan || '-'}</strong></div>
+            
+            <div class="btn-group">
+              ${mapsBtnHTML}
+              ${waBtnHTML}
+              ${fotoLaporanHTML}
+              ${fotoSelesaiHTML}
+              ${tombolStatus}
+            </div>
+          </div>
+        `;
+        container.innerHTML += cardHTML;
+      });
+    }
+
+    function updateStatusSimpel(id, statusBaru) {
+      if (!confirm(`Ubah status laporan ${id} menjadi ${statusBaru}?`)) return;
+
+      const btnRefresh = document.getElementById('btn-refresh');
+      btnRefresh.innerText = "⏳ Memproses status...";
+
+      fetch(SCRIPT_URL + `?action=update_status&id=${encodeURIComponent(id)}&statusBaru=${encodeURIComponent(statusBaru)}`, {
+        method: 'POST'
+      })
+      .then(res => res.json())
+      .then(() => {
+        alert(`Status ${id} diubah menjadi ${statusBaru}!`);
+        muatLaporan();
+      })
+      .catch(() => setTimeout(muatLaporan, 1500));
+    }
+
+    function bukaModalSelesai(id) {
+      isModalOpen = true;
+      selectedIdForSelesai = id;
+      document.getElementById('modal-id-text').innerText = id;
+      document.getElementById('inputFotoBukti').value = '';
+      document.getElementById('modalUpload').style.display = 'flex';
+    }
+
+    function tutupModal() {
+      isModalOpen = false;
+      document.getElementById('modalUpload').style.display = 'none';
+    }
+
+    function compressAndGetBase64(file, callback) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          const maxDim = 1000;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          callback(compressedBase64);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function submitSelesai() {
+      const fileInput = document.getElementById('inputFotoBukti');
+      if (fileInput.files.length === 0) {
+        alert("⚠️ Wajib mengunggah/mengambil foto bukti penanganan!");
+        return;
+      }
+
+      const btnSubmit = document.getElementById('btnProsesSelesai');
+      btnSubmit.disabled = true;
+      btnSubmit.innerText = "⏳ Mengompres & mengunggah foto...";
+
+      const file = fileInput.files[0];
+
+      compressAndGetBase64(file, function(base64Data) {
+        btnSubmit.innerText = "⏳ Mengirim data ke Google Drive...";
+
+        const payload = {
+          action: "update_status",
+          id: selectedIdForSelesai,
+          statusBaru: "SELESAI",
+          imageData: base64Data
+        };
+
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(res => {
+          btnSubmit.disabled = false;
+          btnSubmit.innerText = "Kirim & Selesaikan";
+
+          if (res.status === "success") {
+            tutupModal();
+            alert(`Laporan ${selectedIdForSelesai} berhasil diselesaikan dan foto tersimpan di Drive!`);
+            muatLaporan();
+          } else {
+            alert(`❌ GAGAL UPLOAD DRIVE:\n${res.errorMessage}\n\nSilakan lakukan otorisasi izin Drive pada Google Apps Script terlebih dahulu.`);
+          }
+        })
+        .catch(err => {
+          btnSubmit.disabled = false;
+          btnSubmit.innerText = "Kirim & Selesaikan";
+          alert("❌ Terjadi kesalahan jaringan / server. Pengiriman dibatalkan.");
+        });
+      });
+    }
+
+    // Auto load data pertama kali
+    muatLaporan();
+  </script>
+</body>
+</html>
