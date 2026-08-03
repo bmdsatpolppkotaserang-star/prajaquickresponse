@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pqr-v1';
+const CACHE_NAME = 'pqr-v1.1';
 const urlsToCache = [
   './',
   './index.html',
