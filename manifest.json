@@ -1,7 +1,7 @@
 {
-  "name": "Praja Quick Response",
-  "short_name": "PQR Satpol PP",
-  "description": "Dashboard Pelaporan Reaksi Cepat Satpol PP",
+  "name": "DALMAS",
+  "short_name": "DALMAS",
+  "description": "Dashboard Pelaporan Masyarakat",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f0f2f5",
@@ -9,16 +9,16 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "icons/maskable_icon_x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "icons/maskable_icon_x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ]
 }
