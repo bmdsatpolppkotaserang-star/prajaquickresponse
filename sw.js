@@ -1,4 +1,4 @@
-const CACHE_NAME = 'DALMAS-v1.2';
+const CACHE_NAME = 'DALMAS-v1.3';
 const urlsToCache = [
   './',
   './index.html',
