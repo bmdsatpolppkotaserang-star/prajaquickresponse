@@ -1,12 +1,12 @@
-const CACHE_NAME = 'pqr-v1.1';
+const CACHE_NAME = 'DALMAS-v1.2';
 const urlsToCache = [
   './',
   './index.html',
   './kotaserang.png',
   './polpp.png',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/maskable_icon_x192.png',
+  './icons/maskable_icon_x512.png'
 ];
 
 // Install Service Worker
